@@ -71,7 +71,7 @@ jobs:
           chmod +x "$build_script"
           find "$scripts_path" -type f -exec chmod +x {} \;
           
-          echo "scripts_path=$$GITHUB_WORKSPACE" >> $GITHUB_ENV
+          echo "scripts_path=$GITHUB_WORKSPACE" >> $GITHUB_ENV
           echo "scripts_file=$scripts_file" >> $GITHUB_ENV
 
       - name: Run compile scripts
