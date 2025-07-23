@@ -53,25 +53,23 @@ jobs:
 
       - name: Set compile scripts
         run: |
-          echo "workspace:"
-          ls -al "$GITHUB_WORKSPACE"
-          # 运行脚本路径
-          scripts_path="${GITHUB_WORKSPACE}/scripts"  
+          # 脚本路径
+          scripts_path="$GITHUB_WORKSPACE/scripts"
           if [ ! -d "${scripts_path}" ]; then
-              echo "Script path does not exist, Please check!"  
+              echo "脚本路径 '$scripts_path' 不存在!"
               exit 1
           fi
-          echo "script list:"
-          ls -al "$scripts_path"
-          # 查找脚本并赋予权限
-          find $GITHUB_WORKSPACE/scripts -exec chmod +x {} \;
           
-          # 检查执行脚本
-          scripts_file="${GITHUB_WORKSPACE}/scripts/${BUILD_SCRIPT}"
-          if [ ! -e "${scripts_file}" ]; then
-              echo "Script files does not exist, Please check!"
+          # 执行脚本
+          build_script="$GITHUB_WORKSPACE/$BUILD_SCRIPT"
+          if [ ! -f "$build_script" ]; then
+              echo "执行脚本 '$build_script' 不存在!"
               exit 1
           fi
+          
+          # 赋予权限
+          chmod +x "$build_script"
+          find "$$GITHUB_WORKSPACE/scripts" -type f -exec chmod +x {} \;
           
           echo "scripts_path=${scripts_path}" >> $GITHUB_ENV
           echo "scripts_file=${scripts_file}" >> $GITHUB_ENV
