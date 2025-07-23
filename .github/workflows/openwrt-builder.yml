@@ -78,15 +78,19 @@ jobs:
         id: compile-scripts
         working-directory: ${{ env.scripts_path }}
         run: |
+          ls -al $PWD
+          
           # 执行脚本
           scripts_file=${{ env.scripts_file }}
+          echo "scripts=$scripts_file"
+          
           if [ -x "${scripts_file}" ]; then
               source ${scripts_file} 1
           fi
           
           # 检查固件信息
           if [ -z "${FIRMWARE_JSON_OBJECT}" ]; then
-              echo "Firmware does not exist, Please check!"
+              echo "未生成固件,请检查!"
               exit 1
           fi
           
