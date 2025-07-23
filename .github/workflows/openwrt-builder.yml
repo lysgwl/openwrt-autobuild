@@ -92,7 +92,7 @@ jobs:
           # JSON对象进行 Base64 编码
           ENCODED_JSON=$(echo -n "${FIRMWARE_JSON_OBJECT}" | base64 | tr -d '\n')
           
-          echo $FIRMWARE_JSON_OBJECT
+          echo "Firmware JSON: ${FIRMWARE_JSON_OBJECT}"
 
           # 设置 Base64 编码输出
           echo "encoded_json=${ENCODED_JSON}" >> $GITHUB_OUTPUT 
@@ -135,16 +135,6 @@ jobs:
           
           # 设置数组输出
           echo "firmware_json=$(jq -c . <<< "${firmware_json_array}")" >> $GITHUB_OUTPUT
-          
-      - name: Upload Firmware Folder
-        uses: actions/upload-artifact@main
-        if: steps.extract_firmware_info.outputs.name != '' &&
-            steps.extract_firmware_info.outputs.path != '' &&
-            !cancelled()
-        with:
-          name: ${{ steps.extract_firmware_info.outputs.name }}
-          path: ${{ steps.extract_firmware_info.outputs.path }}
-          
       - name: Delete workflow runs
         uses: Mattraks/delete-workflow-runs@v2  # main
         with:
@@ -152,34 +142,3 @@ jobs:
           repository: ${{ github.repository }}
           retain_days: 3
           keep_minimum_runs: 2
-
-  upload:
-    runs-on: ubuntu-22.04
-    needs: build
-    
-    strategy:
-      matrix:
-        firmware:
-          ${{ fromJson(needs.build.outputs.firmware) }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@main
-
-      - name: Download Firmware Folder
-        uses: actions/download-artifact@main
-        with:
-          name: ${{ needs.build.outputs.name }}
-          path: ${{ needs.build.outputs.path }}
-
-      - name: Upload Firmware Directory
-        uses: actions/upload-artifact@main
-        with:
-          name: ${{ matrix.firmware.name }}
-          path: ${{ matrix.firmware.file }}
-          
-      - name: Delete Firmware Artifact 
-        uses: geekyeggo/delete-artifact@main
-        with:
-          name: ${{ needs.build.outputs.name }} 
-          failOnError: false

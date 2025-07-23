@@ -4,7 +4,7 @@
 # 获取OpenWrt固件
 get_openwrt_firmware()
 {
-	print_log "TRACE" "get firmware" "正在获取OpenWrt固件，请等待..."
+	print_log "INFO" "get_openwrt_firmware" "获取 OpenWrt 固件,请等待..."
 	
 	# 源码数组
 	local -n local_source_array="$1"
@@ -12,19 +12,19 @@ get_openwrt_firmware()
 	# 获取路径
 	local path=${local_source_array["Path"]}
 	if [ -z "${path}" ] || [ ! -d "${path}" ]; then
-		print_log "ERROR" "compile firmware" "获取源码路径失败, 请检查!"
+		print_log "ERROR" "get_openwrt_firmware" "获取源码路径失败,请检查!"
 		return 1
 	fi
 	
 	# ------
-	#src_path="${path}/bin/targets/x86/generic"
-	#mkdir -p ${src_path}
+	src_path="${path}/bin/targets/x86/generic"
+	mkdir -p ${src_path}
 	# ------
 	
-	if [ ! -d "${path}/bin/targets" ] || ! find "${path}/bin/targets/" -mindepth 2 -maxdepth 2 -type d -name '*' | grep -q '.'; then
-		print_log "ERROR" "compile firmware" "固件目录不存在, 请检查!"
-		return 1
-	fi
+	#if [ ! -d "${path}/bin/targets" ] || ! find "${path}/bin/targets/" -mindepth 2 -maxdepth 2 -type d -name '*' | grep -q '.'; then
+	#	print_log "ERROR" "get_openwrt_firmware" "固件目录不存在,请检查!"
+	#	return 1
+	#fi
 	
 	# 获取固件信息
 	declare -A fields_array
@@ -49,15 +49,15 @@ get_openwrt_firmware()
 	cd ${path}/bin/targets/*/*
 	
 	# ------
-	#echo "this is a test1" > "${src_path}/test1.txt"
-	#echo "this is a test2" > "${src_path}/test2.txt"
-	#echo "this is a test3" > "${src_path}/test3.txt"
-	#echo "this is a test4" > "${src_path}/test4.txt"
+	echo "this is a test1" > "${src_path}/test1.txt"
+	echo "this is a test2" > "${src_path}/test2.txt"
+	echo "this is a test3" > "${src_path}/test3.txt"
+	echo "this is a test4" > "${src_path}/test4.txt"
 	# ------
 	
 	# 判断目录是否为空
 	if [ ! -n "$(find . -mindepth 1)" ]; then
-		print_log "ERROR" "compile firmware" "固件目录为空, 请检查!"
+		print_log "ERROR" "get_openwrt_firmware" "固件目录为空,请检查!"
 		return 1
 	fi
 	
@@ -76,11 +76,11 @@ get_openwrt_firmware()
 		fi
 		
 		# ------
-		#dd if=/dev/zero of="${src_path}/test1-${device_name}.img" bs=1M count=1
-		#dd if=/dev/zero of="${src_path}/test2-${device_name}.img" bs=1M count=1
+		dd if=/dev/zero of="${src_path}/test1-${device_name}.img" bs=1M count=1
+		dd if=/dev/zero of="${src_path}/test2-${device_name}.img" bs=1M count=1
 		
-		#gzip "${src_path}/test1-${device_name}.img"
-		#gzip "${src_path}/test2-${device_name}.img"
+		gzip "${src_path}/test1-${device_name}.img"
+		gzip "${src_path}/test2-${device_name}.img"
 		# ------
 		
 		# 导出固件路径
@@ -137,6 +137,7 @@ get_openwrt_firmware()
 		
 		# 返回固件JSON数组
 		FIRMWARE_JSON_ARRAY=$(build_json_array firmware_json_array)
+		echo "$FIRMWARE_JSON_ARRAY"
 		
 		# 生成JSON对象数组
 		declare -A object_json_array=(
@@ -148,16 +149,17 @@ get_openwrt_firmware()
 		
 		# 返回固件JSON对象
 		FIRMWARE_JSON_OBJECT=$(build_json_object object_json_array)
+		echo $FIRMWARE_JSON_OBJECT
 	fi
 	
-	print_log "TRACE" "get firmware" "完成获取OpenWrt固件!"
+	print_log "INFO" "get_openwrt_firmware" "完成获取 OpenWrt 固件!"
 	return 0
 }
 
 # 编译openwrt源码
 compile_openwrt_firmware()
 {
-	print_log "TRACE" "compile firmware" "正在编译OpenWrt固件，请等待..."
+	print_log "INFO" "compile_openwrt_firmware" "正在编译 OpenWrt 固件,请等待..."
 	
 	# 传入源码信息
 	local -n local_source_array="$1"
@@ -165,7 +167,7 @@ compile_openwrt_firmware()
 	# 获取路径
 	local path=${local_source_array["Path"]}
 	if [ -z "${path}" ] || [ ! -d "${path}" ]; then
-		print_log "ERROR" "compile firmware" "获取源码路径失败, 请检查!"
+		print_log "ERROR" "compile_openwrt_firmware" "获取源码路径失败,请检查!"
 		return 1
 	fi
 	
@@ -186,19 +188,19 @@ compile_openwrt_firmware()
 		return 0
 	}
 	
-	if ! execute_command_retry ${USER_STATUS_ARRAY["retrycount"]} ${USER_STATUS_ARRAY["waittimeout"]} run_make_command; then	
-		df -hT && print_log "ERROR" "compile firmware" "编译OpenWrt固件失败, 请检查!"
+	if ! execute_command_retry ${USER_STATUS_ARRAY["retrycount"]} ${USER_STATUS_ARRAY["waittimeout"]} run_make_command; then
+		df -hT && print_log "ERROR" "compile_openwrt_firmware" "编译 OpenWrt 固件失败,请检查!"
 		return 1
 	fi
 	
-	print_log "TRACE" "compile firmware" "完成编译OpenWrt固件!"
+	print_log "INFO" "compile_openwrt_firmware" "完成编译 OpenWrt 固件!"
 	return 0
 }
 
 # 下载openwrt包
 download_openwrt_package()
 {
-	print_log "TRACE" "download package" "正在下载OpenWrt软件包，请等待..."
+	print_log "INFO" "download_openwrt_package" "下载 OpenWrt 软件包,请等待..."
 	
 	# 传入源码信息
 	local -n local_source_array="$1"
@@ -206,7 +208,7 @@ download_openwrt_package()
 	# 获取路径
 	local path=${local_source_array["Path"]}
 	if [ -z "${path}" ] || [ ! -d "${path}" ]; then
-		print_log "ERROR" "download package" "获取源码路径失败, 请检查!"
+		print_log "ERROR" "download_openwrt_package" "获取源码路径失败,请检查!"
 		return 1
 	fi
 	
@@ -230,18 +232,18 @@ download_openwrt_package()
 	}
 	
 	if ! execute_command_retry ${USER_STATUS_ARRAY["retrycount"]} ${USER_STATUS_ARRAY["waittimeout"]} run_make_command; then
-		print_log "ERROR" "download package" "下载OpenWrt软件包失败, 请检查!"
+		print_log "ERROR" "download_openwrt_package" "下载 OpenWrt 软件包失败,请检查!"
 		return 1
 	fi
 
-	print_log "TRACE" "download package" "完成下载OpenWrt软件包!"
+	print_log "INFO" "download_openwrt_package" "完成下载 OpenWrt 软件包!"
 	return 0
 }
 
 # 设置功能选项
 set_menu_options()
 {
-	print_log "TRACE" "menu config" "正在设置软件包目录，请等待..."
+	print_log "INFO" "set_menu_options" "设置软件包目录,请等待..."
 	
 	# 传入源码信息
 	local -n local_source_array="$1"
@@ -249,7 +251,7 @@ set_menu_options()
 	# 获取路径
 	local path=${local_source_array["Path"]}
 	if [ -z "${path}" ] || [ ! -d "${path}" ]; then
-		print_log "ERROR" "menu config" "获取源码路径失败, 请检查!"
+		print_log "ERROR" "set_menu_options" "获取源码路径失败,请检查!"
 		return 1
 	fi
 	
@@ -287,7 +289,7 @@ set_menu_options()
 	# 远端编译
 	if [ ${USER_CONFIG_ARRAY["mode"]} -eq ${COMPILE_MODE[remote_compile]} ]; then
 		if [ ! -f "${custom_feeds_file}" ]; then
-			print_log "ERROR" "menu config" "自定义feeds配置文件不存在, 请检查!"
+			print_log "ERROR" "set_menu_options" "自定义 feeds 配置文件不存在,请检查!"
 			return 1
 		fi
 
@@ -297,12 +299,12 @@ set_menu_options()
 		if [ -f "${default_feeds_file}" ]; then
 			if [ ${USER_STATUS_ARRAY["autocompile"]} -eq 0 ]; then
 				if [ -f "${custom_feeds_file}" ]; then
-					if input_prompt_confirm "是否使用自定义feeds配置?"; then
+					if input_prompt_confirm "是否使用自定义 feeds 配置?"; then
 						cp -rf "${custom_feeds_file}" "${default_feeds_file}"
 					fi
 				fi
 
-				make menuconfig		
+				make menuconfig
 			fi
 		else
 			if [ ! -f "${custom_feeds_file}" ]; then
@@ -319,21 +321,21 @@ set_menu_options()
 		./scripts/diffconfig.sh > seed.config
 	fi
 
-	print_log "TRACE" "menu config" "完成设置软件包目录!"
+	print_log "INFO" "set_menu_options" "完成设置软件包目录!"
 	return 0
 }
 
 # 设置自定义配置
 set_custom_config()
 {
-	print_log "TRACE" "custom config" "正在设置自定义配置，请等待..."
+	print_log "INFO" "set_custom_config" "设置自定义配置,请等待..."
 	
 	# 传入源码信息
 	local -n local_source_array=$1
 	
 	# 获取路径
 	if [ -z "${local_source_array["Path"]}" ] || [ ! -d "${local_source_array["Path"]}" ]; then
-		print_log "ERROR" "menu config" "获取源码失败, 请检查!"
+		print_log "ERROR" "set_custom_config" "获取源码失败,请检查!"
 		return 1
 	fi
 	
@@ -350,14 +352,14 @@ set_custom_config()
 	# 设置openwrt缺省配置
 	set_openwrt_config local_source_array
 	
-	print_log "TRACE" "custom config" "完成设置自定义配置!"
+	print_log "INFO" "set_custom_config" "完成设置自定义配置!"
 	return 0
 }
 
 # 更新 openwrt feeds源
 update_openwrt_feeds()
 {
-	print_log "TRACE" "update feeds" "正在更新OpenWrt Feeds源，请等待..."
+	print_log "INFO" "update_openwrt_feeds" "更新 OpenWrt Feeds 源,请等待..."
 	
 	# 传入源码信息
 	local -n local_source_array="$1"
@@ -368,7 +370,7 @@ update_openwrt_feeds()
 	# 获取路径
 	local path=${local_source_array["Path"]}
 	if [ -z "${path}" ] || [ ! -d "${path}" ]; then
-		print_log "ERROR" "update feeds" "获取源码路径失败, 请检查!"
+		print_log "ERROR" "update_openwrt_feeds" "获取源码路径失败,请检查!"
 		return 1
 	fi
 	
@@ -377,27 +379,27 @@ update_openwrt_feeds()
 	
 	command="${NETWORK_PROXY_CMD} ${path}/scripts/feeds update -a"
 	if ! execute_command_retry ${USER_STATUS_ARRAY["retrycount"]} ${USER_STATUS_ARRAY["waittimeout"]} "${command}"; then
-		print_log "ERROR" "update feeds" "更新本地源失败, 请检查!"
+		print_log "ERROR" "update_openwrt_feeds" "更新本地源失败,请检查!"
 		return 1
 	fi
 
 	# Install feeds configuration
-	print_log "INFO" "update feeds" "安装Feeds源码!"
+	print_log "INFO" "update_openwrt_feeds" "安装 Feeds 源码!"
 	
 	command="${NETWORK_PROXY_CMD} ${path}/scripts/feeds install -a"
 	if ! execute_command_retry ${USER_STATUS_ARRAY["retrycount"]} ${USER_STATUS_ARRAY["waittimeout"]} "${command}"; then
-		print_log "ERROR" "update feeds" "安装本地源失败, 请检查!"
+		print_log "ERROR" "update_openwrt_feeds" "安装本地源失败,请检查!"
 		return 1
 	fi
 
-	print_log "TRACE" "update feeds" "完成更新OpenWrt Feeds源!"
+	print_log "INFO" "update_openwrt_feeds" "完成更新 OpenWrt Feeds 源!"
 	return 0
 }
 
 # 设置 openwrt feeds源
 set_openwrt_feeds()
 {
-	print_log "TRACE" "setting feeds" "正在设置OpenWrt Feeds源，请等待..."
+	print_log "INFO" "set_openwrt_feeds" "设置 OpenWrt Feeds 源,请等待..."
 	
 	# 传入源码信息
 	local -n local_source_array="$1"
@@ -405,16 +407,16 @@ set_openwrt_feeds()
 	# 获取路径
 	local path=${local_source_array["Path"]}
 	if [ -z "${path}" ] || [ ! -d "${path}" ]; then
-		print_log "ERROR" "setting feeds" "获取源码路径失败, 请检查!"
+		print_log "ERROR" "set_openwrt_feeds" "获取源码路径失败,请检查!"
 		return 1
 	fi
 	
 	# 设置脚本种子配置文件
-	print_log "INFO" "setting feeds" "拷贝Feeds源配置文件!"
+	print_log "INFO" "set_openwrt_feeds" "拷贝 Feeds 源配置文件!"
 	[ -e ${OPENWRT_FEEDS_CONF_FILE} ] && cp -rf ${OPENWRT_FEEDS_CONF_FILE} ${path}
 	
 	# 设置种子配置文件
-	print_log "INFO" "setting feeds" "设置Feeds源配置文件!"
+	print_log "INFO" "set_openwrt_feeds" "设置 Feeds 源配置文件!"
 	for key in "${!FEEDS_ARRAY[@]}"; do
 
 		if [ "$key" = "istore" ] && [ ${local_source_array["Type"]} -eq ${SOURCE_TYPE[istoreos]} ]; then
@@ -430,14 +432,14 @@ set_openwrt_feeds()
 		fi
 	done
 	
-	print_log "TRACE" "setting feeds" "完成设置OpenWrt Feeds源!"
+	print_log "INFO" "set_openwrt_feeds" "完成设置 OpenWrt Feeds 源!"
 	return 0
 }
 
 # 克隆openwrt源码
 clone_openwrt_source()
 {
-	print_log "TRACE" "clone sources" "正在获取OpenWrt源码，请等待..."
+	print_log "INFO" "clone_openwrt_source" "获取OpenWrt源码,请等待..."
 	
 	# 传入源码信息
 	local -n local_source_array="$1"
@@ -455,12 +457,12 @@ clone_openwrt_source()
 	local command=""
 	
 	if [ -z "${url}" ] || [ -z "${path}" ]; then
-		print_log "ERROR" "clone sources" "获取源码路径失败, 请检查!"
+		print_log "ERROR" "clone_openwrt_source" "获取源码路径失败,请检查!"
 		return 1
 	fi
 	
 	if [ ! -d "${path}" ]; then
-		print_log "INFO" "clone sources" "克隆源码文件!"
+		print_log "INFO" "clone_openwrt_source" "克隆源码文件!"
 		
 		if [ -n "${branch}" ]; then
 			command="${NETWORK_PROXY_CMD} git clone ${url} -b ${branch} --depth=1 ${path}"
@@ -469,15 +471,15 @@ clone_openwrt_source()
 		fi
 		
 		if ! execute_command_retry ${USER_STATUS_ARRAY["retrycount"]} ${USER_STATUS_ARRAY["waittimeout"]} "${command}"; then
-			print_log "ERROR" "clone sources" "Git获取源码失败, 请检查!"
+			print_log "ERROR" "clone_openwrt_source" "Git获取源码失败,请检查!"
 			return 1
 		fi
 	else
-		print_log "INFO" "clone sources" "更新源码文件!"
+		print_log "INFO" "clone_openwrt_source" "更新源码文件!"
 		
 		command="${NETWORK_PROXY_CMD} git -C ${path} pull"
 		if ! execute_command_retry ${USER_STATUS_ARRAY["retrycount"]} ${USER_STATUS_ARRAY["waittimeout"]} "${command}"; then
-			print_log "ERROR" "clone sources" "更新源码失败, 请检查!"
+			print_log "ERROR" "clone_openwrt_source" "更新源码失败,请检查!"
 		fi
 	fi
 	
@@ -487,7 +489,7 @@ clone_openwrt_source()
 		ln -sf ${path} ${GITHUB_WORKSPACE}/${OPENWRT_SOURCEDIR_NAME}
 	fi
 
-	print_log "TRACE" "clone sources" "完成获取OpenWrt源码!"
+	print_log "INFO" "clone_openwrt_source" "完成获取 OpenWrt 源码!"
 	return 0
 }
 
@@ -509,27 +511,27 @@ auto_compile_openwrt()
 	fi
 
 	# 更新 openwrt feeds源
-	if ! update_openwrt_feeds $1; then
-		return 1
-	fi
+	#if ! update_openwrt_feeds $1; then
+	#	return 1
+	#fi
 	
 	# 设置自定义配置
-	set_custom_config $1
+	#set_custom_config $1
 	
 	# 设置功能选项
-	if ! set_menu_options $1; then
-		return 1
-	fi
+	#if ! set_menu_options $1; then
+	#	return 1
+	#fi
 
 	# 下载openwrt包
-	if ! download_openwrt_package $1; then
-		return 1
-	fi
+	#if ! download_openwrt_package $1; then
+	#	return 1
+	#fi
 	
 	# 编译openwrt源码
-	if ! compile_openwrt_firmware $1; then
-		return 1
-	fi
+	#if ! compile_openwrt_firmware $1; then
+	#	return 1
+	#fi
 
 	# 获取OpenWrt固件
 	get_openwrt_firmware $1

@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# 脚本运行参数
-SCRIPT_CMD_ARGS=""
-
 # 工作目录
 OPENWRT_WORKDIR_NAME="workdir"
 
