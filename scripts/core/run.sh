@@ -511,17 +511,17 @@ auto_compile_openwrt()
 	fi
 
 	# 更新 openwrt feeds源
-	#if ! update_openwrt_feeds $1; then
-	#	return 1
-	#fi
+	if ! update_openwrt_feeds $1; then
+		return 1
+	fi
 	
 	# 设置自定义配置
 	#set_custom_config $1
 	
 	# 设置功能选项
-	#if ! set_menu_options $1; then
-	#	return 1
-	#fi
+	if ! set_menu_options $1; then
+		return 1
+	fi
 
 	# 下载openwrt包
 	#if ! download_openwrt_package $1; then
