@@ -69,7 +69,7 @@ jobs:
           
           # 赋予权限
           chmod +x "$build_script"
-          find "$$GITHUB_WORKSPACE/scripts" -type f -exec chmod +x {} \;
+          find "$scripts_path" -type f -exec chmod +x {} \;
           
           echo "scripts_path=${scripts_path}" >> $GITHUB_ENV
           echo "scripts_file=${scripts_file}" >> $GITHUB_ENV
