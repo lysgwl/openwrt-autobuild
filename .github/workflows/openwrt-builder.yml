@@ -90,9 +90,6 @@ jobs:
           
           echo "$FIRMWARE_JSON_OBJECT" > $GITHUB_WORKSPACE/firmware.json
           
-          # 设置 JSON 输出
-          echo "firmware_json=firmware.json" >> $GITHUB_ENV
-          
       - name: Extract Firmware Details
         id: extract_firmware_info
         run: |
@@ -120,7 +117,9 @@ jobs:
     steps:
       - name: Debug Output
         run: |
-          echo "Firmware Path: ${{ fromJson(needs.build.outputs.firmware_json).path }}"
+         # echo "Firmware Json: ${{ fromJson(needs.build.outputs.firmware_json) }}"
+          echo '${{ needs.build.outputs.firmware_json }}' > firmware.json
+          cat firmware.json
           
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
