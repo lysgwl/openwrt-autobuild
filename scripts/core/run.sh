@@ -6,12 +6,12 @@ get_openwrt_firmware()
 {
 	print_log "INFO" "get_openwrt_firmware" "获取 OpenWrt 固件,请等待..."
 	
-	# 源码数组
+	# 参数检查
 	local -n local_source_array="$1"
-	
-	# 获取路径
 	local path=${local_source_array["Path"]}
-	if [ -z "${path}" ] || [ ! -d "${path}" ]; then
+	
+	# 验证路径
+	if [[ -z "${path}" || ! -d "${path}" ]]; then
 		print_log "ERROR" "get_openwrt_firmware" "获取源码路径失败,请检查!"
 		return 1
 	fi
@@ -33,130 +33,102 @@ get_openwrt_firmware()
 	fi
 	
 	# 目标名称
-	target_name="${fields_array["name"]}"
+	local target_name="${fields_array["name"]}"
 
 	# 目标路径
-	target_path="${fields_array["path"]}"
+	local target_path="${fields_array["path"]}"
 	
 	# 版本信息
-	version="${fields_array["version"]}"
+	local version="${fields_array["version"]}"
 	
 	# 设备数组
-	device_array=()
+	local device_array=()
 	IFS=' ' read -r -a device_array <<< "${fields_array["devices"]}"
-	
-	# 进入固件目录
-	# cd ${path}/bin/targets/*/*
-	local target_dir=("$path"/bin/targets/*/*)
-	pushd "${target_dir[0]}" >/dev/null || {
-		print_log "ERROR" "get_openwrt_firmware" "目标目录($target_dir)不存在,请检查!"
-		return 3
-	}
-	
-	trap 'popd > /dev/null' EXIT
-	
-	# ------
-	echo "this is a test1" > "${src_path}/test1.txt"
-	echo "this is a test2" > "${src_path}/test2.txt"
-	echo "this is a test3" > "${src_path}/test3.txt"
-	echo "this is a test4" > "${src_path}/test4.txt"
-	# ------
-	
-	# 判断目录是否为空
-	if [ ! -n "$(find . -mindepth 1)" ]; then
-		print_log "ERROR" "get_openwrt_firmware" "固件目录为空,请检查!"
-		return 1
-	fi
 	
 	# 创建目标路径
 	if [ ! -d "${target_path}" ]; then
 		mkdir -p "${target_path}"
 	fi
 	
-	# 拷贝固件至目标路径
+	# 固件目录
 	local firmware_array=()
-	for value in "${device_array[@]}"; do
-		IFS=':' read -r device_name firmware_name <<< "$value"
-		
-		if [ -z "${device_name}" ] || [ -z "${firmware_name}" ]; then
-			continue
-		fi
-		
-		# ------
-		dd if=/dev/zero of="${src_path}/test1-${device_name}.img" bs=1M count=1
-		dd if=/dev/zero of="${src_path}/test2-${device_name}.img" bs=1M count=1
-		
-		gzip "${src_path}/test1-${device_name}.img"
-		gzip "${src_path}/test2-${device_name}.img"
-		# ------
-		
-		# 导出固件路径
-		local firmware_path="${target_path}/${firmware_name}"
-		
-		if [ ! -d "${firmware_path}" ]; then
-			mkdir -p "${firmware_path}"
-		fi
-		
-		# 拷贝文件	
-		rsync -av \
-			--exclude='packages/' \
-			--include="*${device_name}*.img.gz" \
-			--include="*${device_name}*.manifest" \
-			--exclude='*.img.gz' \
-			--exclude='*.manifest' \
-			--include='*' \
-			${PWD}/ ${firmware_path}/
-
-		firmware_array+=("${firmware_name}:${firmware_path}")
-	done
+	local target_dir=("$path"/bin/targets/*/*)
 	
-	if [ ${USER_CONFIG_ARRAY["mode"]} -eq ${COMPILE_MODE[remote_compile]} ]; then
+	(
+		if ! pushd "${target_dir[0]}" >/dev/null || [ ! -n "$(find . -mindepth 1 -print -quit)" ]; then
+			print_log "ERROR" "get_openwrt_firmware" "固件目录无效: ${target_dir[*]}"
+			return 3
+		fi
+		
+		# ------
+		echo "this is a test1" > "${src_path}/test1.txt"
+		echo "this is a test2" > "${src_path}/test2.txt"
+		echo "this is a test3" > "${src_path}/test3.txt"
+		echo "this is a test4" > "${src_path}/test4.txt"
+		# ------
+		
+		# 处理设备固件
+		for value in "${device_array[@]}"; do
+			IFS=':' read -r device_name firmware_name <<< "$value"
+			[[ -z "${device_name}" || -z "${firmware_name}" ]] && continue
+			
+			# ------
+			dd if=/dev/zero of="test1-${device_name}.img" bs=1M count=1
+			dd if=/dev/zero of="test2-${device_name}.img" bs=1M count=1
+			gzip "test1-${device_name}.img" "test2-${device_name}.img"
+			# ------
+			
+			# 准备固件路径
+			local firmware_path="${target_path}/${firmware_name}"
+			mkdir -p "${firmware_path}" || continue
+			
+			# 复制固件文件
+			rsync -av \
+				--exclude='packages/' \
+				--include="*${device_name}*.img.gz" \
+				--include="*${device_name}*.manifest" \
+				--exclude='*.img.gz' \
+				--exclude='*.manifest' \
+				--include='*' \
+				./ "${firmware_path}/"
+				
+			firmware_array+=("${firmware_name}:${firmware_path}")
+		done
+	)
+	
+	# 远程编译模式处理
+	if [[ ${USER_CONFIG_ARRAY["mode"]} -eq ${COMPILE_MODE[remote_compile]} ]]; then
 		# 计数器
 		local counter=0
 		
-		# 固件信息数组
+		# 固件信息
 		local firmware_json_array=()
 		
-		# 生成固件目标文件
 		for value in "${firmware_array[@]}"; do
-			IFS=':' read -r firmware_name firmware_path <<< "$value"
+			IFS=':' read -r firmware_name firmware_path <<< "${value}"
+			[[ -z "${firmware_name}" || -z "${firmware_path}" ]] && continue
 			
-			if [ -z "${firmware_name}" ] || [ -z "${firmware_path}" ]; then
-				continue
-			fi
+			((counter++))
 			
-			# 增加计数器
-			counter=$((counter + 1))
-			
-			# 遍历固件目录
 			while IFS= read -r -d '' file; do
-				filename=$(basename "${file}")
-				
-				# 输出对象数组
 				declare -A object_array=(
-					["name"]="$(echo "${filename}" | awk -F. '{print $1}')"
+					["name"]="${file##*/}"
 					["file"]="${file}"
 				)
 				
 				firmware_json_array+=("$(build_json_object object_array)")
-			done < <(find "${firmware_path}" -type f -name "*.img.gz" -print0)	
+			done < <(find "${firmware_path}" -type f -name "*.img.gz" -print0)
 		done
 		
-		# 返回固件JSON数组
-		FIRMWARE_JSON_ARRAY=$(build_json_array firmware_json_array)
-		#echo "$FIRMWARE_JSON_ARRAY"
-		
-		# 生成JSON对象数组
+		# 构建最终JSON输出
 		declare -A object_json_array=(
 			["count"]="${counter}"
 			["name"]="${target_name}"
 			["path"]="${target_path}"
-			["firmware"]=${FIRMWARE_JSON_ARRAY}
+			["firmware"]="$(build_json_array firmware_json_array)"
 		)
 		
-		# 返回固件JSON对象
 		FIRMWARE_JSON_OBJECT=$(build_json_object object_json_array)
-		#echo $FIRMWARE_JSON_OBJECT
 	fi
 	
 	print_log "INFO" "get_openwrt_firmware" "完成获取 OpenWrt 固件!"
