@@ -73,10 +73,9 @@ jobs:
           
           echo "scripts_path=$GITHUB_WORKSPACE" >> $GITHUB_ENV
           echo "scripts_file=$build_script" >> $GITHUB_ENV
-
+          echo "curdir=$PWD"
       - name: Run compile scripts
         id: compile-scripts
-        working-directory: ${{ env.scripts_path }}
         run: |
           # 执行脚本
           scripts_file=${{ env.scripts_file }}
@@ -97,12 +96,15 @@ jobs:
           # 设置 JSON 输出
           echo "firmware_json=firmware.json" >> $GITHUB_ENV
           
+          echo "curdir=$PWD"
+          ls -al $PWD
+          cat firmware.json
+          
       - name: Extract Firmware Details
         id: extract_firmware_info
-        working-directory: ${{ env.scripts_path }}
         run: |
-          firmware_path=$(jq -r '.path' firmware.json)
-          echo $firmware_path
+          echo "curdir=$PWD"
+          ls -al $PWD
           
       - name: Delete workflow runs
         uses: Mattraks/delete-workflow-runs@v2  # main
