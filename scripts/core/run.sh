@@ -85,25 +85,21 @@ get_openwrt_firmware()
 		firmware_array+=("$firmware_name:$firmware_path")
 	done
 	
-	size=${#firmware_array[@]}
-	echo "数组大小1: $size" 
-
 	# 远程编译模式处理
 	if [[ ${USER_CONFIG_ARRAY["mode"]} -eq ${COMPILE_MODE[remote_compile]} ]]; then
 		local counter=0
 		local firmware_json_array=()
 		
-		size=${#firmware_array[@]}
-		echo "数组大小2: $size" 
-		
 		for value in "${firmware_array[@]}"; do
+			echo "1"
 			IFS=':' read -r firmware_name firmware_path <<< "${value}"
+			echo "2"
 			[[ -z "$firmware_name" || -z "$firmware_path" ]] && continue
-			
+			echo "3"
 			((counter++))
-			
+			echo "4"
 			echo "$firmware_name - $firmware_path"
-			
+			echo "5"
 			while IFS= read -r -d '' file; do
 				declare -A object_array=(
 					["name"]="${file##*/}"
@@ -112,6 +108,7 @@ get_openwrt_firmware()
 				
 				firmware_json_array+=("$(build_json_object object_array)")
 			done < <(find "${firmware_path}" -type f -name "*.img.gz" -print0)
+			echo "6"
 		done
 		
 		# 构建最终JSON输出
