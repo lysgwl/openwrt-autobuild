@@ -94,8 +94,7 @@ jobs:
         id: extract_firmware_info
         run: |
           firmware_path=$(jq -r '.path' $GITHUB_WORKSPACE/firmware.json)
-          firmware_files=$(jq -r '.firmware[].file' $GITHUB_WORKSPACE/firmware.json)
-          #firmware_files=$(jq -r '.firmware[].file' $GITHUB_WORKSPACE/firmware.json | tr '\n' ' ')
+          firmware_files=$(jq -r '.firmware[].file' $GITHUB_WORKSPACE/firmware.json | tr '\n' ' ')
           
           #jq -r '.firmware[].file' firmware.json | while read file; do
           #    echo $file
@@ -104,12 +103,17 @@ jobs:
           echo "firmware_files=$firmware_files" >> $GITHUB_OUTPUT
           echo "firmware_json=$(jq -c '.' firmware.json)" >> $GITHUB_OUTPUT
           
+          jq -r '.firmware[].file' firmware.json > filelist.txt
+          echo "filelist=$(cat filelist.txt)" >> $GITHUB_OUTPUT
+          
+          cat filelist.txt
+          
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: firmware-test
           path: |
-            ${{ steps.extract_firmware_info.outputs.firmware_files }}
+            ${{ steps.extract_firmware_info.outputs.filelist }}
           retention-days: 7
           compression-level: 0
           
