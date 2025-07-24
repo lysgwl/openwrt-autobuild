@@ -99,9 +99,8 @@ jobs:
         id: extract_firmware_info
         run: |
           firmware_path=$(jq -r '.path' $GITHUB_WORKSPACE/firmware.json)
-          echo $firmware_path
           jq -r '.firmware[].file' firmware.json | while read file; do
-              cat $file
+              echo $file
           done
           
       - name: Delete workflow runs
