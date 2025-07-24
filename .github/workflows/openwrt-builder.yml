@@ -94,8 +94,8 @@ jobs:
         id: extract_firmware_info
         run: |
           firmware_path=$(jq -r '.path' $GITHUB_WORKSPACE/firmware.json)
-          #firmware_files=$(jq -r '.firmware[].file' $GITHUB_WORKSPACE/firmware.json)
-          firmware_files=$(jq -r '.firmware[].file' $GITHUB_WORKSPACE/firmware.json | tr '\n' ' ')
+          firmware_files=$(jq -r '.firmware[].file' $GITHUB_WORKSPACE/firmware.json)
+          #firmware_files=$(jq -r '.firmware[].file' $GITHUB_WORKSPACE/firmware.json | tr '\n' ' ')
           
           #jq -r '.firmware[].file' firmware.json | while read file; do
           #    echo $file
