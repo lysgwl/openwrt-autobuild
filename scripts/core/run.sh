@@ -94,7 +94,7 @@ get_openwrt_firmware()
 		done
 	)
 	
-	ls -al "$firmware_path"
+	ls -al "$target_path"
 	
 	# 远程编译模式处理
 	if [[ ${USER_CONFIG_ARRAY["mode"]} -eq ${COMPILE_MODE[remote_compile]} ]]; then

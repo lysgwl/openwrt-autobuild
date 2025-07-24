@@ -77,10 +77,9 @@ jobs:
       - name: Run compile scripts
         id: compile-scripts
         run: |
-          # 执行脚本
           scripts_file=${{ env.scripts_file }}
-          echo "scripts=$scripts_file"
           
+          # 执行脚本
           if [ -x "${scripts_file}" ]; then
               source ${scripts_file} 1
           fi
