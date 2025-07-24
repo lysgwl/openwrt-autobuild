@@ -95,14 +95,12 @@ jobs:
           echo "$FIRMWARE_JSON_OBJECT" > firmware.json
           
           # 设置 JSON 输出
-          echo "firmware_json=firmware.json" >> $GITHUB_OUTPUT
+          echo "firmware_json=firmware.json" >> $GITHUB_ENV
           
       - name: Extract Firmware Details
         id: extract_firmware_info
-        env:
-          FIRMWARE_JSON: ${{ steps.compile-scripts.outputs.firmware_json }}
         run: |
-          firmware_path=$(jq -r '.count' <<< "${FIRMWARE_JSON}")
+          firmware_path=$(jq -r '.path' firmware.json)
           echo $firmware_path
           
       - name: Delete workflow runs
