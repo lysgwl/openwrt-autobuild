@@ -55,6 +55,8 @@ get_openwrt_firmware()
 		return 3
 	fi
 	
+	trap 'popd > /dev/null' EXIT
+	
 	# 处理设备固件
 	for value in "${device_array[@]}"; do
 		IFS=':' read -r device_name firmware_name <<< "$value"
@@ -78,13 +80,11 @@ get_openwrt_firmware()
 			--exclude='*.img.gz' \
 			--exclude='*.manifest' \
 			--include='*' \
-			./ "$firmware_path/"
+			./ "$firmware_path/" >/dev/null
 			
 		firmware_array+=("$firmware_name:$firmware_path")
 	done
-	
-	popd >/dev/null
-	
+
 	# 远程编译模式处理
 	if [[ ${USER_CONFIG_ARRAY["mode"]} -eq ${COMPILE_MODE[remote_compile]} ]]; then
 		local counter=0
@@ -139,10 +139,8 @@ compile_openwrt_firmware()
 		return 1
 	fi
 	
-	# 进入源码目录
+	# 源码目录
 	pushd ${path} > /dev/null
-	
-	# 设置信号捕捉来在退出时执行popd
 	trap 'popd > /dev/null' EXIT
 	
 	run_make_command() {
@@ -180,10 +178,8 @@ download_openwrt_package()
 		return 1
 	fi
 	
-	# 进入源码目录
+	# 源码目录
 	pushd ${path} > /dev/null
-	
-	# 设置信号捕捉来在退出时执行popd
 	trap 'popd > /dev/null' EXIT
 	
 	run_make_command() {
@@ -248,10 +244,8 @@ set_menu_options()
 		custom_feeds_file="${custom_feeds_file}.config"
 	fi
 	
-	# 进入源码目录
+	# 源码目录
 	pushd ${path} > /dev/null
-	
-	# 设置信号捕捉来在退出时执行popd
 	trap 'popd > /dev/null' EXIT
 
 	# 远端编译
