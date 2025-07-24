@@ -77,7 +77,7 @@ get_openwrt_firmware()
 			# ------
 			
 			# 准备固件路径
-			local firmware_path="${target_path}/${firmware_name}"
+			local firmware_path="$target_path/$firmware_name"
 			mkdir -p "${firmware_path}" || continue
 			
 			# 复制固件文件
@@ -90,11 +90,13 @@ get_openwrt_firmware()
 				--include='*' \
 				./ "$firmware_path/"
 				
+			ls -al "$target_path/$firmware_name"
+				
 			firmware_array+=("$firmware_name:$firmware_path")
 		done
 	)
 	
-	ls -al "$target_path"
+	
 	
 	# 远程编译模式处理
 	if [[ ${USER_CONFIG_ARRAY["mode"]} -eq ${COMPILE_MODE[remote_compile]} ]]; then
