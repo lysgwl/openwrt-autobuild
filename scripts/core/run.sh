@@ -29,7 +29,7 @@ get_openwrt_firmware()
 	# 获取固件信息
 	declare -A fields_array
 	if ! get_firmware_info local_source_array fields_array; then
-		return 1
+		return 2
 	fi
 	
 	# 目标名称
@@ -46,7 +46,12 @@ get_openwrt_firmware()
 	IFS=' ' read -r -a device_array <<< "${fields_array["devices"]}"
 	
 	# 进入固件目录
-	cd ${path}/bin/targets/*/*
+	# cd ${path}/bin/targets/*/*
+	local target_dir=("$path"/bin/targets/*/*)
+	pushd "${target_dir[0]}" >/dev/null || {
+		print_log "ERROR" "get_openwrt_firmware" "目标目录($target_dir)不存在,请检查!"
+		return 3
+	}
 	
 	# ------
 	echo "this is a test1" > "${src_path}/test1.txt"
@@ -506,9 +511,9 @@ auto_compile_openwrt()
 	fi
 	
 	# 设置 openwrt feeds源
-	if ! set_openwrt_feeds $1; then
-		return 1
-	fi
+	#if ! set_openwrt_feeds $1; then
+	#	return 1
+	#fi
 
 	# 更新 openwrt feeds源
 	#if ! update_openwrt_feeds $1; then
