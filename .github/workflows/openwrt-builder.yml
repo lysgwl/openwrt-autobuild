@@ -78,8 +78,6 @@ jobs:
         id: compile-scripts
         working-directory: ${{ env.scripts_path }}
         run: |
-          ls -al $PWD
-          
           # 执行脚本
           scripts_file=${{ env.scripts_file }}
           echo "scripts=$scripts_file"
@@ -94,52 +92,19 @@ jobs:
               exit 1
           fi
           
-          # JSON对象进行 Base64 编码
-          ENCODED_JSON=$(echo -n "${FIRMWARE_JSON_OBJECT}" | base64 | tr -d '\n')
+          echo "$FIRMWARE_JSON_OBJECT" > firmware.json
           
-          echo "Firmware JSON: ${FIRMWARE_JSON_OBJECT}"
-
-          # 设置 Base64 编码输出
-          echo "encoded_json=${ENCODED_JSON}" >> $GITHUB_OUTPUT 
+          # 设置 JSON 输出
+          echo "firmware_json=firmware.json" >> $GITHUB_OUTPUT
           
       - name: Extract Firmware Details
         id: extract_firmware_info
         env:
-          # 获取 Base64 编码信息
-          ENCODED_JSON: ${{ steps.compile-scripts.outputs.encoded_json }}
+          FIRMWARE_JSON: ${{ steps.compile-scripts.outputs.firmware_json }}
         run: |
-          echo "base64:${ENCODED_JSON}"
+          firmware_path=$(jq -r '.count' <<< "${FIRMWARE_JSON}")
+          echo $firmware_path
           
-          # Base64 解码 JSON 对象
-          firmware_json_object=$(echo "$ENCODED_JSON" | base64 --decode)
-          
-          # 获取 count 字段
-          count=$(jq -r '.count' <<< "${firmware_json_object}")
-          if [ ${count} -le 0 ]; then
-              echo "Firmware does not exist, Please check!"
-              exit 1
-          fi
-          
-          # 获取 name 字段
-          name=$(jq -r '.name' <<< "${firmware_json_object}")
-          
-          # 获取 path 字段
-          path=$(jq -r '.path' <<< "${firmware_json_object}")
-          
-          if [ -z "${name}" ] || [ -z "${path}" ]; then
-              echo "Get Firmware information is Failed, please check!"
-              exit 1
-          fi
-          
-          # 获取 json 数组
-          firmware_json_array=$(jq '.firmware' <<< "${firmware_json_object}")
-          
-          # 设置变量输出
-          echo "name=${name}" >> $GITHUB_OUTPUT
-          echo "path=${path}" >> $GITHUB_OUTPUT
-          
-          # 设置数组输出
-          echo "firmware_json=$(jq -c . <<< "${firmware_json_array}")" >> $GITHUB_OUTPUT
       - name: Delete workflow runs
         uses: Mattraks/delete-workflow-runs@v2  # main
         with:
