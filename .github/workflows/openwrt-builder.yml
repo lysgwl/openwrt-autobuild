@@ -98,10 +98,15 @@ jobs:
       - name: Extract Firmware Details
         id: extract_firmware_info
         run: |
+          firmware_json=$(jq -c '.' $GITHUB_WORKSPACE/firmware.json)
           firmware_path=$(jq -r '.path' $GITHUB_WORKSPACE/firmware.json)
-          jq -r '.firmware[].file' firmware.json | while read file; do
-              echo $file
-          done
+          
+          #jq -r '.firmware[].file' firmware.json | while read file; do
+          #    echo $file
+          #done
+          
+          echo "$firmware_path"
+          echo "$firmware_json"
           
       - name: Delete workflow runs
         uses: Mattraks/delete-workflow-runs@v2  # main
