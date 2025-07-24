@@ -84,11 +84,17 @@ get_openwrt_firmware()
 			
 		firmware_array+=("$firmware_name:$firmware_path")
 	done
+	
+	size=${#firmware_array[@]}
+	echo "数组大小1: $size" 
 
 	# 远程编译模式处理
 	if [[ ${USER_CONFIG_ARRAY["mode"]} -eq ${COMPILE_MODE[remote_compile]} ]]; then
 		local counter=0
 		local firmware_json_array=()
+		
+		size=${#firmware_array[@]}
+		echo "数组大小2: $size" 
 		
 		for value in "${firmware_array[@]}"; do
 			IFS=':' read -r firmware_name firmware_path <<< "${value}"
