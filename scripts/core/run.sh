@@ -96,7 +96,7 @@ get_openwrt_firmware()
 			echo "2"
 			[[ -z "$firmware_name" || -z "$firmware_path" ]] && continue
 			echo "3"
-			((counter++))
+			counter=$((counter + 1))
 			echo "4"
 			echo "$firmware_name - $firmware_path"
 			echo "5"
