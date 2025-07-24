@@ -99,6 +99,7 @@ jobs:
           
       - name: Extract Firmware Details
         id: extract_firmware_info
+        working-directory: ${{ env.scripts_path }}
         run: |
           firmware_path=$(jq -r '.path' firmware.json)
           echo $firmware_path
