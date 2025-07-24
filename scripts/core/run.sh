@@ -19,6 +19,11 @@ get_openwrt_firmware()
 	# ------
 	src_path="${path}/bin/targets/x86/generic"
 	mkdir -p ${src_path}
+	
+	echo "this is a test1" > "${src_path}/test1.txt"
+	echo "this is a test2" > "${src_path}/test2.txt"
+	echo "this is a test3" > "${src_path}/test3.txt"
+	echo "this is a test4" > "${src_path}/test4.txt"
 	# ------
 	
 	#if [ ! -d "${path}/bin/targets" ] || ! find "${path}/bin/targets/" -mindepth 2 -maxdepth 2 -type d -name '*' | grep -q '.'; then
@@ -59,13 +64,6 @@ get_openwrt_firmware()
 			print_log "ERROR" "get_openwrt_firmware" "固件目录无效: ${target_dir[*]}"
 			return 3
 		fi
-		
-		# ------
-		echo "this is a test1" > "${src_path}/test1.txt"
-		echo "this is a test2" > "${src_path}/test2.txt"
-		echo "this is a test3" > "${src_path}/test3.txt"
-		echo "this is a test4" > "${src_path}/test4.txt"
-		# ------
 		
 		# 处理设备固件
 		for value in "${device_array[@]}"; do
