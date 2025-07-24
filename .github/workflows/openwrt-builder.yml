@@ -102,6 +102,8 @@ jobs:
           echo "firmware_path=${firmware_path}" >> $GITHUB_OUTPUT
           echo "firmware_json=$(jq -c '.' firmware.json)" >> $GITHUB_OUTPUT
           
+          ls -al "$firmware_path"
+          
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
