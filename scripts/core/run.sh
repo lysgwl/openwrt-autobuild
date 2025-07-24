@@ -91,15 +91,11 @@ get_openwrt_firmware()
 		local firmware_json_array=()
 		
 		for value in "${firmware_array[@]}"; do
-			echo "1"
 			IFS=':' read -r firmware_name firmware_path <<< "${value}"
-			echo "2"
 			[[ -z "$firmware_name" || -z "$firmware_path" ]] && continue
-			echo "3"
+			
 			counter=$((counter + 1))
-			echo "4"
-			echo "$firmware_name - $firmware_path"
-			echo "5"
+
 			while IFS= read -r -d '' file; do
 				declare -A object_array=(
 					["name"]="${file##*/}"
@@ -108,7 +104,6 @@ get_openwrt_firmware()
 				
 				firmware_json_array+=("$(build_json_object object_array)")
 			done < <(find "${firmware_path}" -type f -name "*.img.gz" -print0)
-			echo "6"
 		done
 		
 		# 构建最终JSON输出
@@ -120,7 +115,6 @@ get_openwrt_firmware()
 		)
 		
 		FIRMWARE_JSON_OBJECT=$(build_json_object object_json_array)
-		echo "$FIRMWARE_JSON_OBJECT"
 	fi
 	
 	print_log "INFO" "get_openwrt_firmware" "完成获取 OpenWrt 固件!"

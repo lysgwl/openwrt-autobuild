@@ -100,6 +100,9 @@ jobs:
         run: |
           firmware_path=$(jq -r '.path' $GITHUB_WORKSPACE/firmware.json)
           echo $firmware_path
+          jq -r '.firmware[].file' firmware.json | while read file; do
+              cat $file
+          done
           
       - name: Delete workflow runs
         uses: Mattraks/delete-workflow-runs@v2  # main
