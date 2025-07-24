@@ -53,6 +53,8 @@ get_openwrt_firmware()
 		return 3
 	}
 	
+	trap 'popd > /dev/null' EXIT
+	
 	# ------
 	echo "this is a test1" > "${src_path}/test1.txt"
 	echo "this is a test2" > "${src_path}/test2.txt"
