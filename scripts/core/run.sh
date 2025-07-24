@@ -137,7 +137,7 @@ get_openwrt_firmware()
 		
 		# 返回固件JSON数组
 		FIRMWARE_JSON_ARRAY=$(build_json_array firmware_json_array)
-		echo "$FIRMWARE_JSON_ARRAY"
+		#echo "$FIRMWARE_JSON_ARRAY"
 		
 		# 生成JSON对象数组
 		declare -A object_json_array=(
@@ -149,7 +149,7 @@ get_openwrt_firmware()
 		
 		# 返回固件JSON对象
 		FIRMWARE_JSON_OBJECT=$(build_json_object object_json_array)
-		echo $FIRMWARE_JSON_OBJECT
+		#echo $FIRMWARE_JSON_OBJECT
 	fi
 	
 	print_log "INFO" "get_openwrt_firmware" "完成获取 OpenWrt 固件!"
