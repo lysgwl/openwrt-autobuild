@@ -89,14 +89,15 @@ get_openwrt_firmware()
 				--exclude='*.manifest' \
 				--include='*' \
 				./ "$firmware_path/"
-				
-			ls -al "$target_path/$firmware_name"
-				
 			firmware_array+=("$firmware_name:$firmware_path")
 		done
+		
+		size=${#firmware_array[@]}
+		echo "t1=$size"
 	)
 	
-	
+	size=${#firmware_array[@]}
+	echo "t2=$size"
 	
 	# 远程编译模式处理
 	if [[ ${USER_CONFIG_ARRAY["mode"]} -eq ${COMPILE_MODE[remote_compile]} ]]; then
