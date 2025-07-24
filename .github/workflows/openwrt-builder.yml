@@ -121,3 +121,12 @@ jobs:
       - name: Debug Output
         run: |
           echo "Firmware Path: ${{ fromJson(needs.build.outputs.firmware_json).path }}"
+          
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ needs.build.outputs.release_tag }}
+          path: |
+            ${{ fromJson(needs.build.outputs.firmware_json).path }}/*.img.gz
+          retention-days: 7
+          compression-level: 0
