@@ -88,11 +88,13 @@ get_openwrt_firmware()
 				--exclude='*.img.gz' \
 				--exclude='*.manifest' \
 				--include='*' \
-				./ "${firmware_path}/"
+				./ "$firmware_path/"
 				
-			firmware_array+=("${firmware_name}:${firmware_path}")
+			firmware_array+=("$firmware_name:$firmware_path")
 		done
 	)
+	
+	ls -al "$firmware_path"
 	
 	# 远程编译模式处理
 	if [[ ${USER_CONFIG_ARRAY["mode"]} -eq ${COMPILE_MODE[remote_compile]} ]]; then
@@ -104,9 +106,11 @@ get_openwrt_firmware()
 		
 		for value in "${firmware_array[@]}"; do
 			IFS=':' read -r firmware_name firmware_path <<< "${value}"
-			[[ -z "${firmware_name}" || -z "${firmware_path}" ]] && continue
+			[[ -z "$firmware_name" || -z "$firmware_path" ]] && continue
 			
 			((counter++))
+			
+			echo "$firmware_name - $firmware_path"
 			
 			while IFS= read -r -d '' file; do
 				declare -A object_array=(
