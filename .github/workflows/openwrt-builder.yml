@@ -102,6 +102,15 @@ jobs:
           echo "firmware_path=${firmware_path}" >> $GITHUB_OUTPUT
           echo "firmware_json=$(jq -c '.' firmware.json)" >> $GITHUB_OUTPUT
           
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-test
+          path: |
+            ${{ steps.extract_firmware_info.outputs.firmware_path }}/*.img.gz
+          retention-days: 7
+          compression-level: 0
+          
       - name: Delete workflow runs
         uses: Mattraks/delete-workflow-runs@v2  # main
         with:
@@ -109,23 +118,3 @@ jobs:
           repository: ${{ github.repository }}
           retain_days: 3
           keep_minimum_runs: 2
-          
-  upload:
-    runs-on: ubuntu-22.04
-    needs: build
-    
-    steps:
-      - name: Debug Output
-        run: |
-         # echo "Firmware Json: ${{ fromJson(needs.build.outputs.firmware_json) }}"
-          echo '${{ needs.build.outputs.firmware_json }}' > firmware.json
-          cat firmware.json
-          
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: firmware-${{ needs.build.outputs.release_tag }}
-          path: |
-            ${{ fromJson(needs.build.outputs.firmware_json).path }}/*.img.gz
-          retention-days: 7
-          compression-level: 0
