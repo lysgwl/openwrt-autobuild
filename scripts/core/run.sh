@@ -17,7 +17,8 @@ get_openwrt_firmware()
 	fi
 	
 	# 固件目录
-	local target_dir=("$path"/bin/targets/*/*)
+	#local target_dir=("$path"/bin/targets/*/*)
+	mapfile -t target_dir < <(find "$path/bin/targets" -mindepth 2 -maxdepth 2 -type d)
 	
 	# ------
 	src_path="${path}/bin/targets/x86/generic"
@@ -27,8 +28,6 @@ get_openwrt_firmware()
 		echo "this is a test3" > "${src_path}/test3.txt"
 		echo "this is a test4" > "${src_path}/test4.txt"
 	}
-	
-	ls -al "$src_path"
 	# ------
 	
 	# 检查目录数组是否为空
