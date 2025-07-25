@@ -43,9 +43,6 @@ get_openwrt_firmware()
 	local version="${fields_array["version"]}"
 	IFS=' ' read -r -a device_array <<< "${fields_array["devices"]}"
 	
-	# 创建目标路径
-	mkdir -p "${target_path}"
-	
 	# 固件目录
 	local firmware_array=()
 	local target_dir=("$path"/bin/targets/*/*)
@@ -59,8 +56,8 @@ get_openwrt_firmware()
 	
 	# 处理设备固件
 	for value in "${device_array[@]}"; do
-		IFS=':' read -r device_name firmware_name <<< "$value"
-		[[ -z "${device_name}" || -z "${firmware_name}" ]] && continue
+		local device_name="$value"
+		[[ -z "${device_name}" ]] && continue
 		
 		# ------
 		dd if=/dev/zero of="test1-${device_name}.img" bs=1M count=1
@@ -69,7 +66,7 @@ get_openwrt_firmware()
 		# ------
 		
 		# 准备固件路径
-		local firmware_path="$target_path/$firmware_name"
+		local firmware_path="$target_path"
 		mkdir -p "${firmware_path}" || continue
 		
 		# 复制固件文件
@@ -82,7 +79,7 @@ get_openwrt_firmware()
 			--include='*' \
 			./ "$firmware_path/" >/dev/null
 			
-		firmware_array+=("$firmware_name:$firmware_path")
+		firmware_array+=("$firmware_path")
 	done
 	
 	# 远程编译模式处理
@@ -91,8 +88,8 @@ get_openwrt_firmware()
 		local firmware_json_array=()
 		
 		for value in "${firmware_array[@]}"; do
-			IFS=':' read -r firmware_name firmware_path <<< "${value}"
-			[[ -z "$firmware_name" || -z "$firmware_path" ]] && continue
+			local firmware_path="$value"
+			[[ -z "$firmware_path" ]] && continue
 			
 			counter=$((counter + 1))
 
@@ -115,6 +112,7 @@ get_openwrt_firmware()
 		)
 		
 		FIRMWARE_JSON_OBJECT=$(build_json_object object_json_array)
+		echo $FIRMWARE_JSON_OBJECT
 	fi
 	
 	print_log "INFO" "get_openwrt_firmware" "完成获取 OpenWrt 固件!"

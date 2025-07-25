@@ -280,14 +280,15 @@ get_firmware_info()
 	fi
 	
 	# 获取版本号
+	local version_num
 	if [ ${source_type} -eq ${SOURCE_TYPE[coolsnowwolf]} ]; then
-		local file="${source_path}/package/lean/default-settings/files/zzz-default-settings"
-		if [ -e ${file} ]; then
+		local file="$source_path/package/lean/default-settings/files/zzz-default-settings"
+		if [ -e "$file" ]; then
 			version_num=$(sed -n "s/echo \"DISTRIB_REVISION='\([^\']*\)'.*$/\1/p" $file)
 		fi
 	else
-		local file="${source_path}/include/version.mk"
-		if [ -e ${file} ]; then
+		local file="$source_path/include/version.mk"
+		if [ -e "$file" ]; then
 			line=$(awk -F ':=' '/^VERSION_NUMBER:/ {line=$2} END {print line}' $file)
 			if [ -n "${line}" ]; then
 				version_num=$(echo $line | sed -E 's/.*\(([^,]+),[^,]+,([^)]*)\).*/\2/')
@@ -296,12 +297,16 @@ get_firmware_info()
 	fi
 	
 	# 架构名称
-	arch_name=$(sed -n -r 's/^CONFIG_TARGET_(.*)_DEVICE.*=y/\1/p' "${source_path}/${defaultconf}" | head -n 1)
-	arch_name=$(echo "${arch_name}" | sed 's/_/-/g')
+	arch_name=$(sed -n -r 's/^CONFIG_TARGET_(.*)_DEVICE.*=y/\1/p' "$source_path/$defaultconf" | head -n 1)
+	arch_name=$(echo "$arch_name" | sed 's/_/-/g')
 	
-	result["name"]="openwrt-${arch_name}"
-	result["path"]="${OPENWRT_OUTPUT_PATH}/$(date +"%Y%m%d")"
-	result["version"]="${version_num}"
+	# 构建路径名
+	local file_date=$(date +"%Y%m%d%H%M")
+	local target_name="openwrt-$version_num-$arch_name-$file_date"
+	
+	result["name"]="openwrt-$arch_name"
+	result["path"]="$OPENWRT_OUTPUT_PATH/$target_name"
+	result["version"]="$version_num"
 	
 	# 获取设备名称
 	local device_array=()
@@ -321,8 +326,7 @@ get_firmware_info()
 			firmware_name="${firmware_name}-${version_num}"
 		fi
 		
-		local file_date=$(date +"%Y%m%d%H%M")
-		firmware_name="${firmware_name}-${device_name}-${file_date}"
+		firmware_name="${firmware_name}-${device_name}"
 		
 		device_array+=("${device_name}:${firmware_name}")
 	done < "${source_path}/${defaultconf}"
