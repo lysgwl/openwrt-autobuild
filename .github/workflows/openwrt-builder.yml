@@ -115,13 +115,25 @@ jobs:
           retention-days: 7
           compression-level: 0
           
-      - name: Create Release & Upload Firmware
+      - name: Create Release Tags
+        id: create_release_tags
+        if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+        run: |
+          echo "release_tag=$(date +"%Y.%m.%d-%H.%M")" >> ${GITHUB_OUTPUT}
+          
+          echo "
+            ⏱️ 编译时间: $(date +"%Y年%m月%d日%H时%M分")
+            🌐 管理地址: 192.168.2.1
+          " >> release.txt
+          
+      - name: Upload Firmware Release
         uses: softprops/action-gh-release@master
         if: env.UPLOAD_RELEASE == 'true' && !cancelled()
         with:
           name: ${{ steps.extract_firmware_info.outputs.firmware_name }}
-          tag_name: ${{ steps.extract_firmware_info.outputs.firmware_name }}
+          tag_name: ${{ steps.create_release_tags.outputs.release_tag }}
           files: ${{ steps.extract_firmware_info.outputs.firmware_path }}/*.img.gz
+          body_path: release.txt
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           draft: false
           prerelease: false
