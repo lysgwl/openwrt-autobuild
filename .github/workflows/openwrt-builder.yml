@@ -14,11 +14,13 @@ env:
   UPLOAD_BIN_DIR: true
   UPLOAD_FIRMWARE: false
   UPLOAD_RELEASE: true
-  GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
 jobs:
   build:
     runs-on: ubuntu-22.04
+    env:
+      GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      
     outputs:
       firmware_json: ${{ steps.extract_firmware_info.outputs.firmware_json }}
       
@@ -103,6 +105,7 @@ jobs:
           echo "firmware_path=$firmware_path" >> "$GITHUB_OUTPUT"
           
           firmware_files=$(jq -r '.firmware[].file' "firmware_json_file" | tr '\n' ' ')
+          echo "firmware_files=$firmware_files" >> "$GITHUB_OUTPUT"
           
           firmware_json=$(jq -c '.' "$firmware_json_file")
           echo "firmware_json=$firmware_json" >> "$GITHUB_OUTPUT"
@@ -120,7 +123,8 @@ jobs:
         id: create_release_tags
         if: env.UPLOAD_RELEASE == 'true' && !cancelled()
         run: |
-          echo "release_tag=$(date +"%Y.%m.%d-%H.%M")" >> ${GITHUB_OUTPUT}
+          release_tag="openwrt-$(date +'%Y%m%d-%H%M')"
+          echo "release_tag=$release_tag" >> ${GITHUB_OUTPUT}
           
           echo "
             ## OpenWrt 自动构建版本
