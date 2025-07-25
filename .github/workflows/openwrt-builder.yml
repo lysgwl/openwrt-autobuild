@@ -13,7 +13,7 @@ env:
   BUILD_SCRIPT: build-scripts.sh
   UPLOAD_BIN_DIR: true
   UPLOAD_FIRMWARE: false
-  UPLOAD_RELEASE: false
+  UPLOAD_RELEASE: true
 
 jobs:
   build:
@@ -114,6 +114,14 @@ jobs:
           path: ${{ steps.extract_firmware_info.outputs.firmware_path }}
           retention-days: 7
           compression-level: 0
+          
+      - name: Create Release & Upload Firmware
+        uses: softprops/action-gh-release@master
+        if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+        with:
+          name: ${{ steps.extract_firmware_info.outputs.firmware_name }}
+          tag_name: "$(date +"%Y.%m.%d-%H.%M")"
+          files: ${{ steps.extract_firmware_info.outputs.firmware_path }}/*.img.gz
           
       - name: Delete workflow runs
         uses: Mattraks/delete-workflow-runs@v2  # main
