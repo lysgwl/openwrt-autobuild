@@ -14,6 +14,7 @@ env:
   UPLOAD_BIN_DIR: true
   UPLOAD_FIRMWARE: false
   UPLOAD_RELEASE: true
+  GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
 jobs:
   build:
@@ -153,5 +154,3 @@ jobs:
         with:
           keep_latest: 2
           delete_tags: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
