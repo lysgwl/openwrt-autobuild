@@ -26,23 +26,27 @@ get_openwrt_firmware()
 	}
 	# ------
 	
-	# 固件目录
+	# 获取目录数组
 	#local target_dir=("$path"/bin/targets/*/*)
 	mapfile -t target_dir < <(find "$path/bin/targets" -mindepth 2 -maxdepth 2 -type d)
 	
-	# 检查目录数组是否为空
+	# 检查是否找到目录
 	if [ ${#target_dir[@]} -eq 0 ]; then
 		print_log "ERROR" "get_openwrt_firmware" "未找到固件目录,请检查!"
 		return 1
 	fi
 	
-	echo "dir1=${target_dir[0]}"
-	echo "dir2=$(find "${target_dir[0]}" -mindepth 1 -print -quit)"
+	# 检查第一个目录是否有效
+	if [[ ! -d "${target_dir[0]}" ]]; then
+		print_log "ERROR" "get_openwrt_firmware" "固件目录不存在: ${target_dir[0]}"
+		return 1
+	fi
 	
-	#if [[ ! -d "${target_dir[0]}" ]] || [ -z "$(find "${target_dir[0]}" -mindepth 1 -print -quit 2>/dev/null)" ]; then
-	#	print_log "ERROR" "get_openwrt_firmware" "固件目录不存在,请检查!"
-	#	return 1
-	#fi
+	# 检查目录是否为空
+	if [ -z "$(ls -A "${target_dir[0]}" 2>/dev/null)" ]; then
+		print_log "WARNING" "get_openwrt_firmware" "固件目录为空：${target_dir[0]}"
+		return 1
+	fi
 	
 	# 获取固件信息
 	declare -A fields_array
@@ -56,6 +60,7 @@ get_openwrt_firmware()
 	local version="${fields_array["version"]}"
 	IFS=' ' read -r -a device_array <<< "${fields_array["devices"]}"
 	
+	# 进入目录
 	if ! pushd "${target_dir[0]}" >/dev/null; then
 		print_log "ERROR" "get_openwrt_firmware" "无法进入固件目录: ${target_dir[*]}"
 		return 3
