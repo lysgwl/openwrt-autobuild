@@ -123,9 +123,13 @@ jobs:
           echo "release_tag=$(date +"%Y.%m.%d-%H.%M")" >> ${GITHUB_OUTPUT}
           
           echo "
-            ⏱️ 编译时间: $(date +"%Y年%m月%d日%H时%M分")
-            🌐 管理地址: 192.168.2.1
-          " >> release.txt
+            ## OpenWrt 自动构建版本
+            ### 版本信息
+            - **编译时间:** $(date +'%Y年%m月%d日 %H:%M:%S')
+            - **固件名称:** ${{ steps.extract_firmware_info.outputs.firmware_name }}
+            - **管理地址:** 192.168.2.1
+            - **默认账号:** root
+          " >> release.md
           
       - name: Upload release firmware 
         uses: softprops/action-gh-release@master
@@ -134,8 +138,8 @@ jobs:
           name: ${{ steps.extract_firmware_info.outputs.firmware_name }}
           tag_name: ${{ steps.create_release_tags.outputs.release_tag }}
           files: ${{ steps.extract_firmware_info.outputs.firmware_path }}/*.img.gz
-          body_path: release.txt
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          body_path: release.md
+          token: ${{ env.GITHUB_TOKEN }}
           draft: false
           prerelease: false
           generate_release_notes: true
@@ -143,7 +147,7 @@ jobs:
       - name: Delete workflow runs
         uses: Mattraks/delete-workflow-runs@v2  # main
         with:
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          token: ${{ env.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
           retain_days: 0
           keep_minimum_runs: 0
