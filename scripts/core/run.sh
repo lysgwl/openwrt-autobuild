@@ -27,6 +27,8 @@ get_openwrt_firmware()
 		echo "this is a test3" > "${src_path}/test3.txt"
 		echo "this is a test4" > "${src_path}/test4.txt"
 	}
+	
+	ls -al "$src_path"
 	# ------
 	
 	# 检查目录数组是否为空
@@ -35,10 +37,13 @@ get_openwrt_firmware()
 		return 1
 	fi
 	
-	if [[ ! -d "${target_dir[0]}" ]] || [ -z "$(find "${target_dir[0]}" -mindepth 1 -print -quit 2>/dev/null)" ]; then
-		print_log "ERROR" "get_openwrt_firmware" "固件目录不存在,请检查!"
-		return 1
-	fi
+	echo "dir1=${target_dir[0]}"
+	echo "dir2=$(find "${target_dir[0]}" -mindepth 1 -print -quit)"
+	
+	#if [[ ! -d "${target_dir[0]}" ]] || [ -z "$(find "${target_dir[0]}" -mindepth 1 -print -quit 2>/dev/null)" ]; then
+	#	print_log "ERROR" "get_openwrt_firmware" "固件目录不存在,请检查!"
+	#	return 1
+	#fi
 	
 	# 获取固件信息
 	declare -A fields_array
