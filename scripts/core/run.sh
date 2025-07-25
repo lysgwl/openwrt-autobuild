@@ -16,6 +16,9 @@ get_openwrt_firmware()
 		return 1
 	fi
 	
+	# 固件目录
+	local target_dir=("$path"/bin/targets/*/*)
+	
 	# ------
 	src_path="${path}/bin/targets/x86/generic"
 	mkdir -p ${src_path} && {
@@ -26,10 +29,16 @@ get_openwrt_firmware()
 	}
 	# ------
 	
-	#if [ ! -d "${path}/bin/targets" ] || ! find "${path}/bin/targets/" -mindepth 2 -maxdepth 2 -type d -name '*' | grep -q '.'; then
-	#	print_log "ERROR" "get_openwrt_firmware" "固件目录不存在,请检查!"
-	#	return 1
-	#fi
+	# 检查目录数组是否为空
+	if [ ${#target_dir[@]} -eq 0 ]; then
+		print_log "ERROR" "get_openwrt_firmware" "未找到固件目录,请检查!"
+		return 1
+	fi
+	
+	if [[ ! -d "${target_dir[0]}" ]] || [ -z "$(find "${target_dir[0]}" -mindepth 1 -print -quit 2>/dev/null)" ]; then
+		print_log "ERROR" "get_openwrt_firmware" "固件目录不存在,请检查!"
+		return 1
+	fi
 	
 	# 获取固件信息
 	declare -A fields_array
@@ -43,18 +52,15 @@ get_openwrt_firmware()
 	local version="${fields_array["version"]}"
 	IFS=' ' read -r -a device_array <<< "${fields_array["devices"]}"
 	
-	# 固件目录
-	local firmware_array=()
-	local target_dir=("$path"/bin/targets/*/*)
-	
-	if ! pushd "${target_dir[0]}" >/dev/null || [ ! -n "$(find . -mindepth 1 -print -quit)" ]; then
-		print_log "ERROR" "get_openwrt_firmware" "固件目录无效: ${target_dir[*]}"
+	if ! pushd "${target_dir[0]}" >/dev/null; then
+		print_log "ERROR" "get_openwrt_firmware" "无法进入固件目录: ${target_dir[*]}"
 		return 3
 	fi
 	
 	trap 'popd > /dev/null' EXIT
 	
 	# 处理设备固件
+	local firmware_array=()
 	for value in "${device_array[@]}"; do
 		local device_name="$value"
 		[[ -z "${device_name}" ]] && continue
