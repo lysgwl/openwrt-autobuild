@@ -120,7 +120,7 @@ jobs:
         if: env.UPLOAD_RELEASE == 'true' && !cancelled()
         with:
           name: ${{ steps.extract_firmware_info.outputs.firmware_name }}
-          tag_name: "$(date +"%Y.%m.%d-%H.%M")"
+          tag_name: ${{ steps.extract_firmware_info.outputs.firmware_name }}
           files: ${{ steps.extract_firmware_info.outputs.firmware_path }}/*.img.gz
           
       - name: Delete workflow runs
