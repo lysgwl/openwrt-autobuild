@@ -93,25 +93,24 @@ jobs:
       - name: Extract Firmware Details
         id: extract_firmware_info
         run: |
-          firmware_path=$(jq -r '.path' $GITHUB_WORKSPACE/firmware.json)
-          firmware_files=$(jq -r '.firmware[].file' $GITHUB_WORKSPACE/firmware.json | tr '\n' ' ')
+          firmware_json_file="$GITHUB_WORKSPACE/firmware.json"
           
-          #jq -r '.firmware[].file' firmware.json | while read file; do
-          #    echo $file
-          #done
+          firmware_name=$(jq -r '.name' "$firmware_json_file")
+          echo "firmware_name=$firmware_name" >> "$GITHUB_OUTPUT"
           
-          echo "firmware_files=$firmware_files" >> $GITHUB_OUTPUT
-          echo "firmware_json=$(jq -c '.' firmware.json)" >> $GITHUB_OUTPUT
+          firmware_path=$(jq -r '.path' "$firmware_json_file")
+          echo "firmware_path=$firmware_path" >> "$GITHUB_OUTPUT"
           
-          jq -r '.firmware[].file' firmware.json > filelist.txt
-          echo "filelist=$(cat filelist.txt)" >> $GITHUB_OUTPUT
+          firmware_files=$(jq -r '.firmware[].file' "firmware_json_file" | tr '\n' ' ')
+          
+          firmware_json=$(jq -c '.' "$firmware_json_file")
+          echo "firmware_json=$firmware_json" >> "$GITHUB_OUTPUT"
           
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: firmware-test
-          path: |
-            ${{ steps.extract_firmware_info.outputs.filelist }}
+          name: ${{ steps.extract_firmware_info.outputs.firmware_name }}
+          path: ${{ steps.extract_firmware_info.outputs.firmware_path }}
           retention-days: 7
           compression-level: 0
           
@@ -120,5 +119,5 @@ jobs:
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           repository: ${{ github.repository }}
-          retain_days: 3
-          keep_minimum_runs: 2
+          retain_days: 0
+          keep_minimum_runs: 0
