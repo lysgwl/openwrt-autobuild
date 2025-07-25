@@ -304,7 +304,7 @@ get_firmware_info()
 	local file_date=$(date +"%Y%m%d%H%M")
 	local target_name="openwrt-$version_num-$arch_name-$file_date"
 	
-	result["name"]="openwrt-$arch_name"
+	result["name"]="$target_name"
 	result["path"]="$OPENWRT_OUTPUT_PATH/$target_name"
 	result["version"]="$version_num"
 	
@@ -316,19 +316,19 @@ get_firmware_info()
 		fi
 		
 		local device_name=$(echo "$line" | sed -r 's/.*DEVICE_(.*)=y/\1/')
-		if [ -z "${device_name}" ]; then
+		if [ -z "$device_name" ]; then
 			continue
 		fi
 		
 		# 获取固件名称
 		local firmware_name="openwrt"
-		if [ -n "${version_num}" ]; then
-			firmware_name="${firmware_name}-${version_num}"
+		if [ -n "$version_num" ]; then
+			firmware_name="$firmware_name-$version_num"
 		fi
 		
-		firmware_name="${firmware_name}-${device_name}"
+		firmware_name="$firmware_name-$device_name"
 		
-		device_array+=("${device_name}:${firmware_name}")
+		device_array+=("$device_name")
 	done < "${source_path}/${defaultconf}"
 	
 	result["devices"]="${device_array[@]}"
