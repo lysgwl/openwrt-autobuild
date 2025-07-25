@@ -122,7 +122,7 @@ jobs:
           name: ${{ steps.extract_firmware_info.outputs.firmware_name }}
           tag_name: ${{ steps.extract_firmware_info.outputs.firmware_name }}
           files: ${{ steps.extract_firmware_info.outputs.firmware_path }}/*.img.gz
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           
       - name: Delete workflow runs
         uses: Mattraks/delete-workflow-runs@v2  # main
