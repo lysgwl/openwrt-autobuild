@@ -90,7 +90,7 @@ jobs:
           
           echo "$FIRMWARE_JSON_OBJECT" > $GITHUB_WORKSPACE/firmware.json
           
-      - name: Extract Firmware Details
+      - name: Extract firmware details
         id: extract_firmware_info
         run: |
           firmware_json_file="$GITHUB_WORKSPACE/firmware.json"
@@ -106,7 +106,7 @@ jobs:
           firmware_json=$(jq -c '.' "$firmware_json_file")
           echo "firmware_json=$firmware_json" >> "$GITHUB_OUTPUT"
           
-      - name: Upload Artifacts
+      - name: Upload artifacts firmware
         uses: actions/upload-artifact@v4
         if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
         with:
@@ -115,7 +115,7 @@ jobs:
           retention-days: 7
           compression-level: 0
           
-      - name: Create Release Tags
+      - name: Create release tags
         id: create_release_tags
         if: env.UPLOAD_RELEASE == 'true' && !cancelled()
         run: |
@@ -126,7 +126,7 @@ jobs:
             🌐 管理地址: 192.168.2.1
           " >> release.txt
           
-      - name: Upload Firmware Release
+      - name: Upload release firmware 
         uses: softprops/action-gh-release@master
         if: env.UPLOAD_RELEASE == 'true' && !cancelled()
         with:
@@ -146,3 +146,10 @@ jobs:
           repository: ${{ github.repository }}
           retain_days: 0
           keep_minimum_runs: 0
+          
+      - name: Delete older released
+        uses: dev-drprasad/delete-older-releases@master
+        if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+        with:
+          keep_latest: 2
+          delete_tags: true
