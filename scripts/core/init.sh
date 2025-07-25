@@ -364,7 +364,7 @@ run_app_linux()
 	init_linux_env
 	
 	# 更新linux环境
-	#update_linux_env
+	update_linux_env
 	
 	# 设置linux环境
 	set_linux_env

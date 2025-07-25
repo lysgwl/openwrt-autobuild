@@ -17,13 +17,13 @@ get_openwrt_firmware()
 	fi
 	
 	# ------
-	src_path="${path}/bin/targets/x86/generic"
-	mkdir -p ${src_path} && {
-		echo "this is a test1" > "${src_path}/test1.txt"
-		echo "this is a test2" > "${src_path}/test2.txt"
-		echo "this is a test3" > "${src_path}/test3.txt"
-		echo "this is a test4" > "${src_path}/test4.txt"
-	}
+	#src_path="${path}/bin/targets/x86/generic"
+	#mkdir -p ${src_path} && {
+	#	echo "this is a test1" > "${src_path}/test1.txt"
+	#	echo "this is a test2" > "${src_path}/test2.txt"
+	#	echo "this is a test3" > "${src_path}/test3.txt"
+	#	echo "this is a test4" > "${src_path}/test4.txt"
+	#}
 	# ------
 	
 	# 获取目录数组
@@ -62,7 +62,7 @@ get_openwrt_firmware()
 	
 	# 进入目录
 	if ! pushd "${target_dir[0]}" >/dev/null; then
-		print_log "ERROR" "get_openwrt_firmware" "无法进入固件目录: ${target_dir[*]}"
+		print_log "ERROR" "get_openwrt_firmware" "无法进入固件目录: ${target_dir[0]}"
 		return 3
 	fi
 	
@@ -75,9 +75,9 @@ get_openwrt_firmware()
 		[[ -z "${device_name}" ]] && continue
 		
 		# ------
-		dd if=/dev/zero of="test1-${device_name}.img" bs=1M count=1
-		dd if=/dev/zero of="test2-${device_name}.img" bs=1M count=1
-		gzip "test1-${device_name}.img" "test2-${device_name}.img"
+		#dd if=/dev/zero of="test1-${device_name}.img" bs=1M count=1
+		#dd if=/dev/zero of="test2-${device_name}.img" bs=1M count=1
+		#gzip "test1-${device_name}.img" "test2-${device_name}.img"
 		# ------
 		
 		# 准备固件路径
@@ -478,17 +478,17 @@ auto_compile_openwrt()
 	fi
 	
 	# 设置 openwrt feeds源
-	#if ! set_openwrt_feeds $1; then
-	#	return 1
-	#fi
+	if ! set_openwrt_feeds $1; then
+		return 1
+	fi
 
 	# 更新 openwrt feeds源
-	#if ! update_openwrt_feeds $1; then
-	#	return 1
-	#fi
+	if ! update_openwrt_feeds $1; then
+		return 1
+	fi
 	
 	# 设置自定义配置
-	#set_custom_config $1
+	set_custom_config $1
 	
 	# 设置功能选项
 	if ! set_menu_options $1; then
@@ -496,14 +496,14 @@ auto_compile_openwrt()
 	fi
 
 	# 下载openwrt包
-	#if ! download_openwrt_package $1; then
-	#	return 1
-	#fi
+	if ! download_openwrt_package $1; then
+		return 1
+	fi
 	
 	# 编译openwrt源码
-	#if ! compile_openwrt_firmware $1; then
-	#	return 1
-	#fi
+	if ! compile_openwrt_firmware $1; then
+		return 1
+	fi
 
 	# 获取OpenWrt固件
 	get_openwrt_firmware $1
