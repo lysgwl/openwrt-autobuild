@@ -104,7 +104,7 @@ jobs:
           firmware_path=$(jq -r '.path' "$firmware_json_file")
           echo "firmware_path=$firmware_path" >> "$GITHUB_OUTPUT"
           
-          firmware_files=$(jq -r '.firmware[].file' "firmware_json_file" | tr '\n' ' ')
+          firmware_files=$(jq -r '.firmware[].file' "$firmware_json_file" | tr '\n' ' ')
           echo "firmware_files=$firmware_files" >> "$GITHUB_OUTPUT"
           
           firmware_json=$(jq -c '.' "$firmware_json_file")
