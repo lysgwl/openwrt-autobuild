@@ -1,8 +1,5 @@
 [common_config]
-luci-app-alist
 luci-app-diskman
-luci-app-socat
-alist
 
 [immortalwrt_config]
 [lede_config]

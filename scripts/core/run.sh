@@ -218,25 +218,24 @@ download_openwrt_package()
 set_menu_options()
 {
 	print_log "INFO" "set_menu_options" "设置软件包目录,请等待..."
-	
-	# 传入源码信息
 	local -n local_source_array="$1"
 	
 	# 获取路径
-	local path=${local_source_array["Path"]}
-	if [ -z "${path}" ] || [ ! -d "${path}" ]; then
-		print_log "ERROR" "set_menu_options" "获取源码路径失败,请检查!"
+	if [ -z "${local_source_array["Path"]}" ] || [ ! -d "${local_source_array["Path"]}" ]; then
+		print_log "ERROR" "set_menu_options" "获取源码失败,请检查!"
 		return 1
 	fi
 	
+	local source_path=${local_source_array["Path"]}
+	
 	# 缺省feeds配置文件
-	local default_feeds_file="${path}/${USER_CONFIG_ARRAY["defaultconf"]}"
+	local default_feeds_file="$source_path/${USER_CONFIG_ARRAY["defaultconf"]}"
 	
 	# 自定义feeds配置文件
 	local custom_feeds_file=""
 	if [ -n "${USER_CONFIG_ARRAY["userdevice"]}" ] && [ -n "${local_source_array["Alias"]}" ]; then
-		local feeds_file_path="${OPENWRT_CONFIG_PATH}/conf-file/${USER_CONFIG_ARRAY["userdevice"]}"
-		custom_feeds_file="${feeds_file_path}/${local_source_array["Alias"]}"
+		local feeds_file_path="$OPENWRT_CONFIG_PATH/conf-file/${USER_CONFIG_ARRAY["userdevice"]}"
+		custom_feeds_file="$feeds_file_path/${local_source_array["Alias"]}"
 		
 		if [ "${USER_CONFIG_ARRAY["nginxcfg"]}" = "1" ]; then
 			custom_feeds_file="${custom_feeds_file}-nginx"
@@ -251,39 +250,39 @@ set_menu_options()
 			custom_feeds_file="${custom_feeds_file}-${USER_CONFIG_ARRAY["userdevice"]}"
 		fi
 		
-		custom_feeds_file="${custom_feeds_file}.config"
+		custom_feeds_file="$custom_feeds_file.config"
 	fi
 	
 	# 源码目录
-	pushd ${path} > /dev/null
+	pushd "$source_path" > /dev/null
 	trap 'popd > /dev/null' EXIT
 
 	# 远端编译
-	if [ ${USER_CONFIG_ARRAY["mode"]} -eq ${COMPILE_MODE[remote_compile]} ]; then
-		if [ ! -f "${custom_feeds_file}" ]; then
+	if [[ "${USER_CONFIG_ARRAY["mode"]}" -eq "${COMPILE_MODE[remote_compile]}" ]]; then
+		if [[ ! -f "$custom_feeds_file" ]]; then
 			print_log "ERROR" "set_menu_options" "自定义 feeds 配置文件不存在,请检查!"
 			return 1
 		fi
 
-		cp -rf "${custom_feeds_file}" "${default_feeds_file}"
+		cp -rf "$custom_feeds_file" "$default_feeds_file"
 		make defconfig
 	else  # 本地编译
-		if [ -f "${default_feeds_file}" ]; then
-			if [ ${USER_STATUS_ARRAY["autocompile"]} -eq 0 ]; then
-				if [ -f "${custom_feeds_file}" ]; then
+		if [[ -f "$default_feeds_file" ]]; then
+			if [[ "${USER_STATUS_ARRAY["autocompile"]}" -eq 0 ]]; then
+				if [[ -f "$custom_feeds_file" ]]; then
 					if input_prompt_confirm "是否使用自定义 feeds 配置?"; then
-						cp -rf "${custom_feeds_file}" "${default_feeds_file}"
+						cp -rf "$custom_feeds_file" "$default_feeds_file"
 					fi
 				fi
 
 				make menuconfig
 			fi
 		else
-			if [ ! -f "${custom_feeds_file}" ]; then
+			if [[ ! -f "$custom_feeds_file" ]]; then
 				make menuconfig
 			else
-				cp -rf "${custom_feeds_file}" "${default_feeds_file}"
-				if [ ${USER_STATUS_ARRAY["autocompile"]} -eq 0 ]; then
+				cp -rf "$custom_feeds_file" "$default_feeds_file"
+				if [[ "${USER_STATUS_ARRAY["autocompile"]}" -eq 0 ]]; then
 					make menuconfig
 				fi
 			fi
@@ -311,19 +310,26 @@ set_custom_config()
 		return 1
 	fi
 	
-	# 添加插件
-	if ! set_openwrt_plugins local_source_array; then
-		return 1
+	# 设置插件
+	if ! set_user_plugin local_source_array; then
+		return 2
 	fi
 	
-	# 添加主题
-	if ! set_openwrt_themes local_source_array; then
-		return 1
+	# 设置主题
+	if ! set_user_themes local_source_array; then
+		return 3
 	fi
 
-	# 设置openwrt缺省配置
-	set_openwrt_config local_source_array
+	# 设置配置
+	if ! set_user_config local_source_array; then
+		return 4
+	fi
 	
+	# 网络配置
+	if ! set_user_network local_source_array; then
+		return 5
+	fi
+
 	print_log "INFO" "set_custom_config" "完成设置自定义配置!"
 	return 0
 }

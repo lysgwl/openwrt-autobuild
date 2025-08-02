@@ -42,9 +42,3 @@ load_module "network-setup" "$SCRIPTS_DIR/diyscripts" || {
 	print_log "ERROR" "COMMON" "加载设置功能失败, 请检查!"
 	exit 1
 }
-
-# 加载导入功能
-load_module "loader" "$SCRIPTS_DIR/dispatcher" || {
-	print_log "ERROR" "COMMON" "加载导入功能失败, 请检查!"
-	exit 1
-}

@@ -344,12 +344,12 @@ remove_plugin_package()
 	
 	if [ ! -e "${conf_file}" ]; then
 		print_log "ERROR" "user config" "插件配置文件不存在, 请检查!"
-		return
+		return 1
 	fi
 	
 	if ! is_valid_json "${array_json}"; then
 		print_log "ERROR" "user config" "不是有效的JSON格式数据, 请检查!"
-		return
+		return 2
 	fi
 	
 	local plugin_array=()
@@ -387,4 +387,6 @@ remove_plugin_package()
 			done
 		done
 	fi
+	
+	return 0
 }
